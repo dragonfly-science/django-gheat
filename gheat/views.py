@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from gheat import dots
 from gheat import backend, color_schemes, translate, ROOT, log, \
         ALWAYS_BUILD
+from gheat.models import Point
 
 from django.http import HttpResponseBadRequest
 from django.conf import settings
@@ -55,7 +56,7 @@ def generate_tile(request,color_scheme,zoom,x,y):
         return fspath
 
     color_scheme = color_schemes[color_scheme]
-    tile = backend.Tile(color_scheme, dots, zoom, x, y, fspath)
+    tile = backend.Tile(Point.objects.all(), color_scheme, dots, zoom, x, y, fspath, last_modified_field='modtime')
     if tile.is_empty():
         fspath = color_scheme.get_empty_fspath(zoom)
         log.debug('serving empty tile, request: %s, file %s' % (path,fspath))

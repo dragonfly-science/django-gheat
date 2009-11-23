@@ -4,10 +4,11 @@ import os
 import stat
 
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.gis.geos import Polygon
 
 import gheat
 import gheat.opacity
-from gheat.models import Point
+#from gheat.models import Point
 from gheat import gheatsettings as settings
 from gheat import gmerc
 from gheat import BUILD_EMPTIES, DIRMODE, SIZE, log
@@ -98,7 +99,7 @@ class Tile(object):
 
     img = None
 
-    def __init__(self, color_scheme, dots, zoom, x, y, fspath):
+    def __init__(self, queryset, color_scheme, dots, zoom, x, y, fspath, point_field='geometry', last_modified_field=None, density_field=None):
         """x and y are tile coords per Google Maps.
         """
 
@@ -150,12 +151,19 @@ class Tile(object):
         self.y2 = y2
 
         self.expanded_size = expanded_size
-        self.llbound = (n,s,e,w)
+        self.bbox = Polygon.from_bbox((w,s,e,n))
         self.zoom = zoom
         self.fspath = fspath
         self.opacity = gheat.opacity.zoom_to_opacity[zoom]
         self.color_scheme = color_scheme
   
+        self.queryset = queryset
+        self.point_field = point_field
+        self.last_modified_field = last_modified_field
+        self.density_field = density_field
+
+    def features_inside(self):
+        return self.queryset.filter(**{self.point_field + "__intersects": self.bbox})
 
     def is_empty(self):
         """With attributes set on self, return a boolean.
@@ -163,8 +171,7 @@ class Tile(object):
         Calc lat/lng bounds of this tile (include half-dot-width of padding)
         SELECT count(uid) FROM points
         """
-        numpoints = Point.objects.num_points(self)
-        return numpoints == 0
+        return not bool(self.features_inside()[:1])
 
 
     def is_stale(self):
@@ -173,16 +180,13 @@ class Tile(object):
         Calc lat/lng bounds of this tile (include half-dot-width of padding)
         SELECT count(uid) FROM points WHERE modtime < modtime_tile
         """
-        if not os.path.isfile(self.fspath):
+        if not self.last_modified_field or not os.path.isfile(self.fspath):
             return True
    
         timestamp = os.stat(self.fspath)[stat.ST_MTIME]
         modtime = datetime.datetime.fromtimestamp(timestamp)
 
-        numpoints = Point.objects.num_points(self, modtime)
-
-        return numpoints > 0
-
+        return bool(self.features_inside().filter(**{self.last_modified_field + "__gt":modtime})[:1])
 
     def rebuild(self):
         """Rebuild the image at self.img. Real work delegated to subclasses.
@@ -193,20 +197,23 @@ class Tile(object):
         # Build a closure that gives us the x,y pixel coords of the points
         # to be included on this tile, relative to the top-left of the tile.
 
-        _points = Point.objects.points_inside(self)
-   
+        fields = [self.point_field]
+        if self.density_field:
+            fields.append(self.density_field)
+        _points = self.features_inside().values(*fields)
+
         def points():
             """Yield x,y pixel coords within this tile, top-left of dot.
             """
             result = []
-            for point in _points:
-                x, y = gmerc.ll2px(point.latitude, point.longitude, self.zoom)
+            for feature_dict in _points:
+                point = feature_dict[self.point_field]
+                x, y = gmerc.ll2px(point.y, point.x, self.zoom)
                 x = x - self.x1 # account for tile offset relative to
                 y = y - self.y1 #  overall map
-                point_density = point.density
-                while point_density > 0:
+                point_density = feature_dict.get(self.density_field, 1)
+                for i in range(point_density):
                     result.append((x-self.pad,y-self.pad))
-                    point_density = point_density - 1
             return result
 
 
