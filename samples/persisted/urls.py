@@ -1,12 +1,4 @@
 from django.conf.urls.defaults import *
 
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from home.urls import urlpatterns
 
-urlpatterns = patterns('',
-    # Example:
-    (r'^home/', include('home.urls')),
-    (r'^gheat/', include('gheat.urls')),
-
-)
