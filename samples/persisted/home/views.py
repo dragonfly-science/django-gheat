@@ -36,10 +36,10 @@ def serve_tile(request,color_scheme,zoom,x,y):
 
     fspath = generate_tile(request,color_scheme,zoom,x,y)
 
-    if settings.DEBUG:
-        return serve(request, fspath, '/')
-    else:
-        return HttpResponseRedirect(fspath.replace(ROOT, '/site_media/gheat/'))
+    #if settings.DEBUG:
+    return serve(request, fspath, '/')
+    #else:
+    #    return HttpResponseRedirect(fspath.replace(ROOT, '/gheat/'))
 
 
 def generate_tile(request,color_scheme,zoom,x,y):
