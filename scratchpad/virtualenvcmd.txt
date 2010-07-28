@@ -1,0 +1,1 @@
+cleanpyc && rm -fr /tmp/gheat && django-admin.py runserver --settings=gheat_demo.settings

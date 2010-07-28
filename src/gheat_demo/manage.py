@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 from django.core.management import execute_manager
-import sys
-from os.path import dirname, abspath, join
-
 try:
     import settings # Assumed to be in the same directory.
 except ImportError:
