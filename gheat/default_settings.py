@@ -5,7 +5,7 @@ from django.conf import settings
 
 from os.path import dirname, abspath, join
 # Default Gheat settings
-GHEAT_BACKEND = getattr(settings, 'GHEAT_BACKEND','PIL')
+GHEAT_RENDER_BACKEND = getattr(settings, 'GHEAT_RENDER_BACKEND','PIL')
 GHEAT_ZOOM_OPAQUE=getattr(settings, 'GHEAT_ZOOM_OPAQUE', -1)
 GHEAT_ZOOM_TRANSPARENT=getattr(settings, 'GHEAT_ZOOM_TRANSPARENT', 17)
 GHEAT_FULL_OPAQUE=getattr(settings, 'GHEAT_FULL_OPAQUE', True)

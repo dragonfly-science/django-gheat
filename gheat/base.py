@@ -9,7 +9,7 @@ from django.contrib.gis.geos import Polygon
 import gheat
 import gheat.opacity
 #from gheat.models import Point
-from gheat import gheatsettings as settings
+from gheat import default_settings as settings
 from gheat import gmerc
 from gheat import BUILD_EMPTIES, DIRMODE, SIZE, log
 

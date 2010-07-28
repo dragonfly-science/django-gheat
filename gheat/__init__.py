@@ -1,7 +1,7 @@
 import logging
 import os
 
-from gheat import gheatsettings as settings
+from gheat import default_settings as settings
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
@@ -19,7 +19,7 @@ log = logging.getLogger('gheat')
 
 # Configuration
 # =============
-# Set some things that backends will need.
+# Set some things that renderer backends will need.
 ALWAYS_BUILD = settings.GHEAT_ALWAYS_BUILD
 BUILD_EMPTIES = settings.GHEAT_BUILD_EMPTIES
 
@@ -36,41 +36,40 @@ MAX_ZOOM = 31 # this depends on Google API; 0 is furthest out as of recent ver.
 # Try to find an image library.
 # =============================
 
-BACKEND = None 
-BACKEND_PIL = False 
-BACKEND_PYGAME = False
+RENDER_BACKEND = None 
+RENDER_BACKEND_PIL = False 
+RENDER_BACKEND_PYGAME = False
 
-_want = settings.GHEAT_BACKEND.lower()
+_want = settings.GHEAT_RENDER_BACKEND.lower()
 if _want not in ('pil', 'pygame', ''):
-    raise ImproperlyConfigured( "The %s backend is not supported, only PIL and "
+    raise ImproperlyConfigured( "The %s render backend is not supported, only PIL and "
                             + "Pygame (assuming those libraries are installed)."
                              )
 
 if _want:
     if _want == 'pygame':
-        from gheat import pygame_ as backend
+        from gheat.render_backend import pygame as renderer
     elif _want == 'pil':
-        from gheat import pil_ as backend
-    BACKEND = _want
+        from gheat.render_backend import pil as renderer
+    RENDER_BACKEND = _want
 else:
     try:
-        from gheat import pygame_ as backend
-        BACKEND = 'pygame'
+        from gheat.render_backend import pygame as renderer
+        RENDER_BACKEND = 'pygame'
     except ImportError:
         try:
-            from gheat import pil_ as backend
-            BACKEND = 'pil'
+            from gheat.render_backend import pil as renderer
+            RENDER_BACKEND = 'pil'
         except ImportError:
-            raise
             pass
     
-    if BACKEND is None:
-        raise ImportError("Neither Pygame nor PIL could be imported.")
+if RENDER_BACKEND is None:
+    raise ImportError("Neither Pygame nor PIL could be imported.")
 
-BACKEND_PYGAME = BACKEND == 'pygame'
-BACKEND_PIL = BACKEND == 'pil'
+RENDER_BACKEND_PYGAME = RENDER_BACKEND == 'pygame'
+RENDER_BACKEND_PIL = RENDER_BACKEND == 'pil'
 
-log.info("Using the %s library" % BACKEND)
+log.info("Using the %s library" % RENDER_BACKEND)
 
 
 # Set up color schemes and dots.
@@ -84,13 +83,13 @@ for fname in os.listdir(_color_schemes_dir):
         continue
     name = os.path.splitext(fname)[0]
     fspath = os.path.join(_color_schemes_dir, fname)
-    color_schemes[name] = backend.ColorScheme(name, fspath)
+    color_schemes[name] = renderer.ColorScheme(name, fspath)
 
-def load_dots(backend):
-    """Given a backend module, return a mapping of zoom level to Dot object.
+def load_dots(renderer):
+    """Given a render backend module, return a mapping of zoom level to Dot object.
     """
-    return dict([(zoom, backend.Dot(zoom)) for zoom in range(MAX_ZOOM)])
-dots = load_dots(backend) # factored for easier use from scripts
+    return dict([(zoom, renderer.Dot(zoom)) for zoom in range(MAX_ZOOM)])
+dots = load_dots(renderer) # factored for easier use from scripts
 
 # Some util methods
 # =================
