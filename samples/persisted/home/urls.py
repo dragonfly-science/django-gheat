@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
-from django.conf import settings
 
 urlpatterns = patterns('home.views',
     url(
@@ -16,7 +15,7 @@ urlpatterns = patterns('home.views',
         kwargs  = {
             'template': 'home.html',
             'extra_context': {
-                'google_key':settings.GOOGLE_MAPS_KEY,
+                'google_key':"ABQIAAAAFqOBQZEkQrzdpAXWWh2PJxSF6qlhTrOc6maB832AZm-MQnPVlhRZpAb9CRt3WCquMu99uH2s77jJvw",
                 }
             }
     ),

@@ -17,7 +17,7 @@
         copyrights.addCopyright(copyright);
         heatmap = new GTileLayer(copyrights, 10, 0);
         heatmap.getTileUrl = function (tile, zoom) {
-            base = 'http://127.0.0.1:8000/gheat/';
+            base = '/gheat/';
             color_scheme = 'firetrans';
             url = base + color_scheme +'/'+ zoom +'/'
             url += tile.x +','+ tile.y +'.png';
@@ -28,10 +28,10 @@
     
         function initialize () {
             var map = new GMap2(document.getElementById("map"));
-            var toronto = new GLatLng(43.5,-79.2);
+            var center = new GLatLng(38.9517053, -92.3340724);
             map.addControl(new GSmallMapControl());
             map.addControl(new GMapTypeControl());
-            map.setCenter(toronto, 7);
+            map.setCenter(center, 4);
             map.addOverlay(new GTileLayerOverlay(heatmap));
         }
     

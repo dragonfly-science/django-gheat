@@ -1,0 +1,14 @@
+_virtualenv
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
+*.swp
+*.lock
+*~
+*.tmp
+*.bak
+build
+dist
+._*
+*.egg-info
