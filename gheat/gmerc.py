@@ -1,18 +1,16 @@
-"""This is a port of Google's GMercatorProjection.fromLatLngToPixel.
+""" Utility to translate pixels (on a Google Maps mercator map) to coordinates.
 
-Doco on the original:
+Ported/reverse-engineered from Google's GMercatorProjection.fromLatLngToPixel.
+
+Documentation on the original:
 
   http://code.google.com/apis/maps/documentation/reference.html#GMercatorProjection
 
-
-Here's how I ported it:
+Documentation on the port:
 
   http://blag.whit537.org/2007/07/how-to-hack-on-google-maps.html
 
-
-The goofy variable names below are an artifact of Google's javascript
-obfuscation.
-
+Variable names are an artifact of Google's javascript obfuscation.
 """
 import math
 

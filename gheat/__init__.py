@@ -10,10 +10,10 @@ from django.db import connection
 # ==============
 
 if settings.DEBUG:
-    level = logging.INFO
+    loglevel = logging.INFO
 else:
-    level = logging.WARNING
-logging.basicConfig(level=level) # Ack! This should be in Aspen. :^(
+    loglevel = logging.ERROR
+logging.basicConfig(level=loglevel)
 log = logging.getLogger('gheat')
 
 

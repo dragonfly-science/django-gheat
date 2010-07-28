@@ -1,9 +1,9 @@
 import os
 
 import numpy
-import pygame
-from gheat import SIZE, base
-
+import pygame #TODO does this cause name conflict?
+from gheat import SIZE
+from gheat.render_backend import base
 
 WHITE = (255, 255, 255)
 

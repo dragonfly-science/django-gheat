@@ -21,8 +21,6 @@ class ColorScheme(object):
     def __init__(self, name, fspath):
         """Takes the name and filesystem path of the defining PNG.
         """
-#        if aspen.mode.DEVDEB:
-#            aspen.restarter.track(fspath)
         self.hook_set(fspath)
         self.empties_dir = os.path.join(settings.GHEAT_MEDIA_ROOT, name, 'empties')
         self.build_empties()

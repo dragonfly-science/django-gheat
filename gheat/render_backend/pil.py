@@ -1,9 +1,9 @@
 import os
 
 from PIL import Image, ImageChops
-from gheat import SIZE, base
+from gheat import SIZE
 from gheat.opacity import OPAQUE
-
+from gheat.render_backend import base
 
 class ColorScheme(base.ColorScheme):
 
