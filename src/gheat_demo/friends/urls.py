@@ -10,9 +10,6 @@ urlpatterns = patterns('gheat_demo.friends.views',
         name    = 'home',
         kwargs  = {
             'template': 'home.html',
-            'extra_context': {
-                'google_key':getattr(settings,'GOOGLE_API_KEY','')
-                }
             }
     ),
     # URL pattern that serves tiles at the path that Google Maps API expects

@@ -85,8 +85,6 @@ INSTALLED_APPS = (
 # see gheat.default_settings for a full list of settings you can override
 GHEAT_ALWAYS_BUILD = False
 
-GOOGLE_API_KEY = 'ABQIAAAA6NuvWGazX80RVrkSkvrUXBTpH3CbXHjuCVmaTc5MkkU4wO1RRhSZXiYEMqjgwJ9gi_PC8AA-dDGz6g' # 127.0.0.1:8000
-
 GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 
-#CACHE_BACKEND = 'memcached://127.0.0.1:55838/'
+CACHE_BACKEND = 'memcached://127.0.0.1:55838/'
