@@ -45,6 +45,7 @@ def generate_tile(request,color_scheme,zoom,x,y):
     
     storage_backend = storage()
     
+    print storage_backend.has_tile(tile, 'friendmap')
     if tile.is_empty():
         bytes = storage_backend.get_emptytile_bytes(tile)
     else: # tile.is_stale() or ALWAYS_BUILD:

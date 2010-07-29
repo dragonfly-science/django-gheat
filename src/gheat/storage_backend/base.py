@@ -36,6 +36,8 @@ class BaseStorage(object):
     
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+import os
+
 class FileSystemStorage(BaseStorage):
     """
     Storage backend that uses a directory to store actual image files. (Classic
@@ -46,7 +48,65 @@ class FileSystemStorage(BaseStorage):
         if not self.storage_dir:
             raise ImproperlyConfigured("The gheat FileSystem storage backend requires " + \
                 "GHEAT_FILESYSTEM_STORAGE_DIR to be set.")
+    
+    def dir_for_tile(self, tile, mapname=""):
+        return os.path.join(self.storage_dir, mapname, tile.color_scheme)
         
+    
+    def path_for_tile(self, tile, mapname=""):
+        tiledir = self.dir_for_tile(tile, mapname)
+        return os.path.join(tiledir, "%s-%s,%s.png" % (tile.zoom, tile.x, tile.y))
+    
+    def has_tile(self, tile, mapname=""):
+        filepath = self.path_for_tile(tile, mapname)
+        return os.path.exists(filepath)
+        
+    def get_tile(self, tile, mapname=""):
+        if not self.has_tile(tile, mapname):
+            fileobj = tile.generate()
+            
+            # Generate the storage directory for this tile, if it doesn't exist
+            tiledir = self.dir_for_tile(tile, mapname)
+            if not os.path.exists(tiledir):
+                os.makedirs(tiledir)
+            
+            # Open the output file and write to it.
+            tilepath = self.path_for_tile(tile, mapname)
+            outfile = open(tilepath, 'wb')
+            for line in fileobj:
+                outfile.write(line)
+            outfile.close()
+            fileobj.seek(0)
+            
+            return fileobj
+        else:
+            tilepath = self.path_for_tile(tile, mapname)
+            print tilepath
+            tilefile = open(tilepath, 'rb')
+            return tilefile
+    
+    def get_emptytile(self, tile):
+        storage_dir = os.path.join(self.storage_dir, "empty_tiles")
+        empty_tile_path = os.path.join(storage_dir, "%s-empty.png" % tile.color_scheme)
+        
+        if not os.path.exists(empty_tile_path):
+            if not os.path.exists(storage_dir):
+                os.makedirs(tiledir)
+                
+            fileobj = tile.get_empty()
+            
+            # Open the output file and write to it.
+            outfile = open(empty_tile_path, 'wb')
+            for line in fileobj:
+                outfile.write(line)
+            outfile.close()
+            fileobj.seek(0)
+            
+            return fileobj
+        else:
+            tilefile = open(empty_tile_path, 'rb')
+            return tilefile
+
 class DjangoCacheStorage(BaseStorage):
     """
     Storage backend that stores binary image data in the cache backend defined in
