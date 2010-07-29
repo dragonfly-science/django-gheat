@@ -36,3 +36,5 @@ if __name__ == "__main__":
                         geometry=geo_from_str('POINT(%s %s)' % (coord[0],coord[1]))
                     )
                     p.save()
+                    p.name = u"friend %s" % p.pk
+                    p.save()

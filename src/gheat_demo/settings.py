@@ -10,9 +10,9 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# Replace this with your own PostGIS (or other GeoDjango-ready) database settings
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'gheat-persisted',
         'USER': 'mtigas',
