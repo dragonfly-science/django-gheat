@@ -1,0 +1,7 @@
+# mtigas/django-gheat
+
+A massive refactor of django-gheat, picking off from [tcarobruce's fork](http://github.com/tcarobruce/django-gheat) that separated "core" gheat functionality from the Django model/view layers.
+
+This refactor goes further by splitting gheat functionality between *image rendering* and *image storage/caching* so that not only is image rendering modular (PIL, pygame), but storage backends (file storage, Django cache) can also be swapped.
+
+A minimal example application is included (complete, with fixtures).
