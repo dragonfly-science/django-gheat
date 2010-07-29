@@ -2,19 +2,33 @@
 # Normally set on a localsettings.py file or the same settings.py of your
 # home project
 from django.conf import settings
-
 from os.path import dirname, abspath, join
-# Default Gheat settings
+
+# ===== Some constants =====
+STORAGES = range(0,0+3)
+STORAGE_DUMMY, STORAGE_FILESYSTEM, STORAGE_DJANGO_CACHE = STORAGES
+
+RENDERERS = range(100,100+2)
+RENDERER_PIL, RENDERER_PYGAME = RENDERERS
+
+# ===== Storage backends =====
+GHEAT_STORAGE_BACKEND = getattr(settings, 'GHEAT_STORAGE_BACKEND', STORAGE_DUMMY)
+
+# Filesystem-specific:
+GHEAT_FILESYSTEM_STORAGE_DIR = getattr(settings, 'GHEAT_FILESYSTEM_STORAGE_DIR', None)
+
+# ===== Image rendering backends =====
 GHEAT_RENDER_BACKEND = getattr(settings, 'GHEAT_RENDER_BACKEND','PIL')
+
+# ===== General settings =====
 GHEAT_ZOOM_OPAQUE=getattr(settings, 'GHEAT_ZOOM_OPAQUE', -1)
 GHEAT_ZOOM_TRANSPARENT=getattr(settings, 'GHEAT_ZOOM_TRANSPARENT', 17)
 GHEAT_FULL_OPAQUE=getattr(settings, 'GHEAT_FULL_OPAQUE', True)
 GHEAT_BUILD_EMPTIES=getattr(settings, 'GHEAT_BUILD_EMPTIES', True)
 GHEAT_ALWAYS_BUILD=getattr(settings, 'GHEAT_ALWAYS_BUILD', True)
-GHEAT_DIRMODE = getattr(settings, 'GHEAT_DIRMODE', '0755')
 
+# ===== Internals =====
 GHEAT_CONF_DIR = getattr(settings, 'GHEAT_CONF_DIR', join(dirname(abspath(__file__)), 'etc'))
-GHEAT_MEDIA_ROOT = getattr(settings, 'GHEAT_MEDIA_ROOT', '/tmp/gheat/')
 DEBUG = settings.DEBUG
 
 # Use settings-defined loglevel, if available. Otherwise, default to 'DEBUG' or 'ERROR'-only for non-debug

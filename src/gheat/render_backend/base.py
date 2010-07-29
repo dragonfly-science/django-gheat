@@ -9,102 +9,76 @@ import gheat
 import gheat.opacity
 from gheat import default_settings as gheat_settings
 from gheat import gmerc
-from gheat import BUILD_EMPTIES, DIRMODE, SIZE, log
+from gheat import BUILD_EMPTIES, SIZE, log
 
 
 class ColorScheme(object):
-    """Base class for color scheme representations.
+    """
+    Base class for color scheme representations.
     """
 
-    def __init__(self, name, fspath):
-        """Takes the name and filesystem path of the defining PNG.
+    def __init__(self, schemename, definition_png):
         """
-        self.hook_set(fspath)
-        self.empties_dir = os.path.join(gheat_settings.GHEAT_MEDIA_ROOT, name, 'empties')
-        self.build_empties()
-
-
-    def build_empties(self):
-        """Build empty tiles for this color scheme.
+        Takes the name and filesystem path of the defining PNG.
         """
-        empties_dir = self.empties_dir
+        self.definition_png = definition_png
 
-        if not BUILD_EMPTIES:
-            log.info("not building empty tiles for %s " % self)
-        else:    
-            if not os.path.isdir(empties_dir):
-                os.makedirs(empties_dir, DIRMODE)
-            if not os.access(empties_dir, os.R_OK|os.W_OK|os.X_OK):
-                raise ImproperlyConfigured( "Permissions too restrictive on "
-                                        + "empties directory "
-                                        + "(%s)." % empties_dir
-                                         )
-            for fname in os.listdir(empties_dir):
-                if fname.endswith('.png'):
-                    os.remove(os.path.join(empties_dir, fname))
-            for zoom, opacity in gheat.opacity.zoom_to_opacity.items():
-                fspath = os.path.join(empties_dir, str(zoom)+'.png')
-                self.hook_build_empty(opacity, fspath)
-            
-            log.info("building empty tiles in %s" % empties_dir)
-
-
-    def get_empty_fspath(self, zoom):
-        fspath = os.path.join(self.empties_dir, str(zoom)+'.png')
-        if not os.path.isfile(fspath):
-            self.build_empties() # so we can rebuild empties on the fly
-        return fspath
-
-
-    def hook_set(self):
-        """Set things that your backend will want later.
+    def get_empty(self, opacity):
+        """
+        Returns file-like object, representing the PNG image file for the
+        'empty tile' for this color scheme.
         """
         raise NotImplementedError
-
-
-    def hook_build_empty(self, opacity, fspath):
-        """Given an opacity and a path, save an empty tile.
-        """
-        raise NotImplementedError
-
+    
+    #def build_empties(self):
+    #    """Build empty tiles for this color scheme.
+    #    """
+    #    empties_dir = self.empties_dir
+    #
+    #    if not BUILD_EMPTIES:
+    #        log.info("not building empty tiles for %s " % self)
+    #    else:    
+    #        if not os.path.isdir(empties_dir):
+    #            os.makedirs(empties_dir, DIRMODE)
+    #        if not os.access(empties_dir, os.R_OK|os.W_OK|os.X_OK):
+    #            raise ImproperlyConfigured( "Permissions too restrictive on "
+    #                                    + "empties directory "
+    #                                    + "(%s)." % empties_dir
+    #                                     )
+    #        for fname in os.listdir(empties_dir):
+    #            if fname.endswith('.png'):
+    #                os.remove(os.path.join(empties_dir, fname))
+    #        for zoom, opacity in gheat.opacity.zoom_to_opacity.items():
+    #            empty_png = os.path.join(empties_dir, str(zoom)+'.png')
+    #            self.hook_build_empty(opacity, empty_png)
+    #        
+    #        log.info("building empty tiles in %s" % empties_dir)
 
 class Dot(object):
-    """Base class for dot representations.
-
-    Unlike color scheme, the same basic external API works for both backends. 
-    How we compute that API is different, though.
-
+    """
+    Base class for a dot representation for a given zoomlevel.
     """
 
     def __init__(self, zoom):
-        """Takes a zoom level.
-        """
         name = 'dot%d.png' % zoom
-        fspath = os.path.join(gheat_settings.GHEAT_CONF_DIR, 'dots', name)
-        self.img, self.half_size = self.hook_get(fspath)
-        
-    def hook_get(self, fspath):
-        """Given a filesystem path, return two items.
-        """
-        raise NotImplementedError
-
+        self.definition_png = os.path.join(gheat_settings.GHEAT_CONF_DIR, 'dots', name)
 
 class Tile(object):
-    """Base class for tile representations.
     """
-
+    Base class for tile representations.
+    """
     img = None
 
-    def __init__(self, queryset, color_scheme, dots, zoom, x, y, fspath, point_field='geometry', last_modified_field=None, density_field=None):
-        """x and y are tile coords per Google Maps.
+    def __init__(self, queryset, color_scheme, dots, zoom, x, y, point_field='geometry', last_modified_field=None, density_field=None):
         """
-
+        x and y are tile coords per Google Maps.
+        """
+        
         # Calculate some things.
         # ======================
-
+        
         dot = dots[zoom]
-
-
+        
         # Translate tile to pixel coords.
         # -------------------------------
 
@@ -149,14 +123,21 @@ class Tile(object):
         self.expanded_size = expanded_size
         self.bbox = Polygon.from_bbox((w,s,e,n))
         self.zoom = zoom
-        self.fspath = fspath
         self.opacity = gheat.opacity.zoom_to_opacity[zoom]
         self.color_scheme = color_scheme
-  
         self.queryset = queryset
         self.point_field = point_field
         self.last_modified_field = last_modified_field
         self.density_field = density_field
+        
+        _color_schemes_dir = os.path.join(gheat_settings.GHEAT_CONF_DIR, 'color-schemes')
+        self.schemeobj = ColorScheme(
+            self.color_scheme,
+            os.path.join(_color_schemes_dir, "%s.png" % self.color_scheme)
+        )
+        
+    def get_empty(self, opacity=gheat.opacity.OPAQUE):
+        return self.schemeobj.get_empty(opacity)
 
     def features_inside(self):
         return self.queryset.filter(**{self.point_field + "__intersects": self.bbox})
@@ -176,85 +157,33 @@ class Tile(object):
         Calc lat/lng bounds of this tile (include half-dot-width of padding)
         SELECT count(uid) FROM points WHERE modtime < modtime_tile
         """
-        if not self.last_modified_field or not os.path.isfile(self.fspath):
-            return True
-   
-        timestamp = os.stat(self.fspath)[stat.ST_MTIME]
-        modtime = datetime.datetime.fromtimestamp(timestamp)
+        return True
+        #if not self.last_modified_field or not os.path.isfile(self.fspath):
+        #    return True
+        #
+        #timestamp = os.stat(self.fspath)[stat.ST_MTIME]
+        #modtime = datetime.datetime.fromtimestamp(timestamp)
+        #
+        #return bool(self.features_inside().filter(**{self.last_modified_field + "__gt":modtime})[:1])
 
-        return bool(self.features_inside().filter(**{self.last_modified_field + "__gt":modtime})[:1])
-
-    def rebuild(self):
-        """Rebuild the image at self.img. Real work delegated to subclasses.
-        """
-
-        # Calculate points.
-        # =================
-        # Build a closure that gives us the x,y pixel coords of the points
-        # to be included on this tile, relative to the top-left of the tile.
-
+    def points(self):
         fields = [self.point_field]
         if self.density_field:
             fields.append(self.density_field)
         _points = self.features_inside().values(*fields)
+        
+        result = []
+        for feature_dict in _points:
+            point = feature_dict[self.point_field]
+            x, y = gmerc.ll2px(point.y, point.x, self.zoom)
+            x = x - self.x1 # account for tile offset relative to
+            y = y - self.y1 #  overall map
+            point_density = feature_dict.get(self.density_field, 1)
+            for i in range(point_density):
+                result.append((x-self.pad,y-self.pad))
+        return result
 
-        def points():
-            """Yield x,y pixel coords within this tile, top-left of dot.
-            """
-            result = []
-            for feature_dict in _points:
-                point = feature_dict[self.point_field]
-                x, y = gmerc.ll2px(point.y, point.x, self.zoom)
-                x = x - self.x1 # account for tile offset relative to
-                y = y - self.y1 #  overall map
-                point_density = feature_dict.get(self.density_field, 1)
-                for i in range(point_density):
-                    result.append((x-self.pad,y-self.pad))
-            return result
-
-
-        # Main logic
-        # ==========
-        # Hand off to the subclass to actually build the image, then come back 
-        # here to maybe create a directory before handing back to the backend
-        # to actually write to disk.
-
-        self.img = self.hook_rebuild(points())
-
-        dirpath = os.path.dirname(self.fspath)
-        if dirpath and not os.path.isdir(dirpath):
-            os.makedirs(dirpath, DIRMODE)
-
-
-    def hook_rebuild(self, points, opacity):
-        """Rebuild and save the file using the current library.
-
-        The algorithm runs something like this:
-
-            o start a tile canvas/image that is a dots-worth oversized
-            o loop through points and multiply dots on the tile
-            o trim back down to straight tile size
-            o invert/colorize the image
-            o make it transparent
-
-        Return the img object; it will be sent back to hook_save after a
-        directory is made if needed.
-
-        Trim after looping because we multiply is the only step that needs the
-        extra information.
-
-        The coloring and inverting can happen in the same pixel manipulation 
-        because you can invert colors.png. That is a 1px by 256px PNG that maps
-        grayscale values to color values. You can customize that file to change
-        the coloration.
-
+    def generate(self):
+        """Rebuild the image at self.img. Real work delegated to subclasses.
         """
         raise NotImplementedError
-
-
-    def save(self):
-        """Write the image at self.img to disk.
-        """
-        raise NotImplementedError
-
-

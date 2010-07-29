@@ -1,6 +1,6 @@
 import os.path
-from django.http import HttpResponseRedirect
-from gheat import dots, renderer, color_schemes, translate, ROOT, log, \
+from django.http import HttpResponse
+from gheat import dots, renderer, storage, color_schemes, translate, log, \
         ALWAYS_BUILD
 
 from django.http import HttpResponseBadRequest
@@ -31,40 +31,23 @@ def serve_tile(request,color_scheme,zoom,x,y):
     except AssertionError, err:
         return HttpResponseBadRequest()
 
-    # @TODO: We should return the file in case is already present
-    # Also we have to implement a redirection to the front end in case we are not in debug mode ... should we ? 
-
-    fspath = generate_tile(request,color_scheme,zoom,x,y)
-
-    #if settings.DEBUG:
-    return serve(request, fspath, '/')
-    #else:
-    #    return HttpResponseRedirect(fspath.replace(ROOT, '/gheat/'))
+    
+    
+    bytes = generate_tile(request,color_scheme,zoom,x,y)
+    return HttpResponse(bytes, content_type="image/png")
 
 
 def generate_tile(request,color_scheme,zoom,x,y):
     '''
         This view will generate the png file for the current request
     '''
-    path = request.path
-
-    path = path[path.index(color_scheme)-1:] # Removing the /gheat/ from the url
-
-    fspath = translate(ROOT, path)
-
-    if os.path.exists(fspath):
-        return fspath
-
-    color_scheme = color_schemes[color_scheme]
-    tile = renderer.Tile(FriendPoint.objects.all(), color_scheme, dots, zoom, x, y, fspath)
+    tile = renderer.Tile(FriendPoint.objects.all(), color_scheme, dots, zoom, x, y)
+    
+    storage_backend = storage()
+    
     if tile.is_empty():
-        fspath = color_scheme.get_empty_fspath(zoom)
-        log.debug('serving empty tile, request: %s, file %s' % (path,fspath))
-    elif tile.is_stale() or ALWAYS_BUILD:
-        log.debug('rebuilding %s' % path)
-        tile.rebuild()
-        tile.save()
-    else:
-        log.debug('serving cached tile %s' % path)
+        bytes = storage_backend.get_emptytile_bytes(tile)
+    else: # tile.is_stale() or ALWAYS_BUILD:
+        bytes = storage_backend.get_tile_bytes(tile, 'friendmap')
 
-    return fspath
+    return bytes
