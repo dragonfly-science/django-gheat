@@ -56,7 +56,7 @@ def generate_tile(request,color_scheme,zoom,x,y):
         return fspath
 
     color_scheme = color_schemes[color_scheme]
-    tile = renderer.Tile(FriendPoint.objects.all(), color_scheme, dots, zoom, x, y, fspath, last_modified_field='modtime')
+    tile = renderer.Tile(FriendPoint.objects.all(), color_scheme, dots, zoom, x, y, fspath)
     if tile.is_empty():
         fspath = color_scheme.get_empty_fspath(zoom)
         log.debug('serving empty tile, request: %s, file %s' % (path,fspath))

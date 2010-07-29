@@ -9,10 +9,8 @@ from django.db import connection
 # Logging config
 # ==============
 
-if gheat_settings.DEBUG:
-    loglevel = logging.INFO
-else:
-    loglevel = logging.ERROR
+loglevel = getattr(logging, gheat_settings.GHEAT_LOG_LEVEL)
+
 logging.basicConfig(level=loglevel)
 log = logging.getLogger('gheat')
 

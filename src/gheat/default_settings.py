@@ -16,3 +16,10 @@ GHEAT_DIRMODE = getattr(settings, 'GHEAT_DIRMODE', '0755')
 GHEAT_CONF_DIR = getattr(settings, 'GHEAT_CONF_DIR', join(dirname(abspath(__file__)), 'etc'))
 GHEAT_MEDIA_ROOT = getattr(settings, 'GHEAT_MEDIA_ROOT', '/tmp/gheat/')
 DEBUG = settings.DEBUG
+
+# Use settings-defined loglevel, if available. Otherwise, default to 'DEBUG' or 'ERROR'-only for non-debug
+GHEAT_LOG_LEVEL = getattr(settings, 'GHEAT_LOG_LEVEL', None)
+if not GHEAT_LOG_LEVEL and DEBUG:
+    GHEAT_LOG_LEVEL = 'DEBUG'
+else:
+    GHEAT_LOG_LEVEL = 'ERROR'
