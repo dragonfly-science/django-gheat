@@ -1,6 +1,6 @@
 import os.path
 from django.http import HttpResponse
-from gheat import dots, renderer, storage, color_schemes, translate, log, \
+from gheat import dots, renderer, StorageBackend, color_schemes, translate, log, \
         ALWAYS_BUILD
 
 from django.http import HttpResponseBadRequest
@@ -43,7 +43,7 @@ def generate_tile(request,color_scheme,zoom,x,y):
     '''
     tile = renderer.Tile(FriendPoint.objects.all(), color_scheme, dots, zoom, x, y)
     
-    storage_backend = storage()
+    storage_backend = StorageBackend()
     
     if tile.is_empty():
         bytes = storage_backend.get_emptytile_bytes(tile)

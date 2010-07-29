@@ -40,11 +40,11 @@ MAX_ZOOM = 31 # this depends on Google API; 0 is furthest out as of recent ver.
 # ==============
 if gheat_settings.GHEAT_STORAGE_BACKEND in STORAGES:
     if gheat_settings.GHEAT_STORAGE_BACKEND is STORAGE_DUMMY:
-        from gheat.storage_backend.base import BaseStorage as storage
+        from gheat.storage_backend import BaseStorage as StorageBackend
     elif gheat_settings.GHEAT_STORAGE_BACKEND is STORAGE_FILESYSTEM:
-        from gheat.storage_backend.base import FileSystemStorage as storage
+        from gheat.storage_backend import FileSystemStorage as StorageBackend
     elif gheat_settings.GHEAT_STORAGE_BACKEND is STORAGE_DJANGO_CACHE:
-        from gheat.storage_backend.base import DjangoCacheStorage as storage
+        from gheat.storage_backend import DjangoCacheStorage as StorageBackend
 else:
     raise ImproperlyConfigured("An invalid GHEAT_STORAGE_BACKEND was set.")
 
