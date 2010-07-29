@@ -17,7 +17,7 @@
         copyrights.addCopyright(copyright);
         heatmap = new GTileLayer(copyrights, 10, 0);
         heatmap.getTileUrl = function (tile, zoom) {
-            base = '/gheat/';
+            base = '/friends/tiles/';
             color_scheme = 'firetrans';
             url = base + color_scheme +'/'+ zoom +'/'
             url += tile.x +','+ tile.y +'.png';
