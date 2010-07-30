@@ -9,6 +9,9 @@ class DjangoCacheStorage(BaseStorage):
     Storage backend that stores binary image data in the cache backend defined in
     your Django project's settings.CACHE_BACKEND
     """
+    def __init__(self, cache_time=None):
+        self.cache_time = cache_time
+    
     def key_for_tile(self, tile, mapname=""):
         key = os.path.join("gheat", mapname, tile.color_scheme, "%s-%s-%s" % (tile.zoom, tile.x, tile.y))
         return key
@@ -24,7 +27,7 @@ class DjangoCacheStorage(BaseStorage):
             
             # Set it in cache
             cachekey = self.key_for_tile(tile,mapname)
-            cache.set(cachekey, fileobj.read())
+            cache.set(cachekey, fileobj.read(), self.cache_time)
             
             # Rewind our in-memory image pseudofile and return it
             fileobj.seek(0)
@@ -46,7 +49,7 @@ class DjangoCacheStorage(BaseStorage):
             fileobj = tile.generate()
             
             # Set it in cache
-            cache.set(cachekey, fileobj.read())
+            cache.set(cachekey, fileobj.read(), self.cache_time)
             
             # Rewind our in-memory image pseudofile and return the data
             fileobj.seek(0)
@@ -63,7 +66,7 @@ class DjangoCacheStorage(BaseStorage):
             fileobj = tile.get_empty()
             
             # Set it in cache
-            cache.set(tile_key, fileobj.read())
+            cache.set(tile_key, fileobj.read(), self.cache_time)
             
             # Rewind our in-memory image pseudofile and return it
             fileobj.seek(0)
@@ -85,7 +88,7 @@ class DjangoCacheStorage(BaseStorage):
             fileobj = tile.get_empty()
             
             # Set it in cache
-            cache.set(tile_key, fileobj.read())
+            cache.set(tile_key, fileobj.read(), self.cache_time)
             
             # Rewind our in-memory image pseudofile and return it
             fileobj.seek(0)
