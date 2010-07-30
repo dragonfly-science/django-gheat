@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 from gheat import dots, renderer, StorageBackend, color_schemes
-from gheat_demo.friends.models import FriendPoint
+from gheat_demo.tweetmap.models import TweetPoint
 
 def serve_tile(request,color_scheme,zoom,x,y):
     # Check arguments
@@ -17,14 +17,14 @@ def serve_tile(request,color_scheme,zoom,x,y):
         return HttpResponseBadRequest()
     
     # Get image and storage backends
-    tile = renderer.Tile(FriendPoint.objects.all(), color_scheme, dots, zoom, x, y)
+    tile = renderer.Tile(TweetPoint.objects.all(), color_scheme, dots, zoom, x, y)
     storage_backend = StorageBackend()
     
     # Grab the raw image data
     if tile.is_empty():
         bytes = storage_backend.get_emptytile_bytes(tile)
     else: # tile.is_stale() or ALWAYS_BUILD:
-        bytes = storage_backend.get_tile_bytes(tile, 'friendmap')
+        bytes = storage_backend.get_tile_bytes(tile, 'tweetmap')
     
     # Write the bytes out to the HttpResponse
     return HttpResponse(bytes, content_type="image/png")

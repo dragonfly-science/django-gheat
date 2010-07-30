@@ -78,7 +78,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'gheat_demo.friends',
+    'gheat_demo.tweetmap',
 )
 
 # ===== gheat specific settings =====
@@ -88,3 +88,7 @@ GHEAT_ALWAYS_BUILD = False
 GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 
 CACHE_BACKEND = 'memcached://127.0.0.1:55838/'
+
+# For 'twitterdump' management command
+TWITTER_USERNAME = u''
+TWITTER_PASSWORD = u''

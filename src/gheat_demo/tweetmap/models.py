@@ -1,6 +1,6 @@
 from django.contrib.gis.db import models
 
-class FriendPoint(models.Model):
+class TweetPoint(models.Model):
     """
         A simple representation of a point inside the gheat database
     """

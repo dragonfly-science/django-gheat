@@ -6,10 +6,10 @@ import urllib2
 import json
 import os
 
-from gheat_demo.friends.models import FriendPoint
+from gheat_demo.tweetmap.models import TweetPoint
 
 class Command(NoArgsCommand):
-    help = "Collects dummy FriendPoint data from the Twitter Stream API."
+    help = "Collects dummy TweetPoint data from the Twitter Stream API."
 
     output_transaction = True
 
@@ -35,7 +35,7 @@ class Command(NoArgsCommand):
                 latitude = tweet['geo']['coordinates'][0]
                 longitude = tweet['geo']['coordinates'][1]
                 coordstr = "POINT(%s %s)" % (longitude, latitude)
-                p = FriendPoint(
+                p = TweetPoint(
                     name=u"%s" % strval,
                     geometry=geo_from_str(coordstr)
                 )
