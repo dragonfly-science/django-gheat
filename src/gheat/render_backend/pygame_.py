@@ -1,12 +1,12 @@
 import os
+from tempfile import NamedTemporaryFile
 
 import numpy
-import pygame #TODO does this cause name conflict?
+import pygame
 from gheat import SIZE
 from gheat.render_backend import base
 
 WHITE = (255, 255, 255)
-
 
 # Needed for colors
 # =================
@@ -19,16 +19,15 @@ os.environ['SDL_VIDEODRIVER'] = 'dummy'
 pygame.display.init()
 pygame.display.set_mode((1,1), 0, 32)
 
-
 class ColorScheme(base.ColorScheme):
+    def __init__(self, schemename, definition_png):
+        super(ColorScheme,self).__init__(schemename, definition_png)
+        
+        self.colors = pygame.image.load(definition_png)
+        self.color_map = pygame.surfarray.pixels3d(self.colors)[0] 
+        self.alpha_map = pygame.surfarray.pixels_alpha(self.colors)[0]
 
-    def hook_set(self, fspath):
-        colors = pygame.image.load(fspath)
-        self.colors = colors = colors.convert_alpha()
-        self.color_map = pygame.surfarray.pixels3d(colors)[0] 
-        self.alpha_map = pygame.surfarray.pixels_alpha(colors)[0]
-
-    def hook_build_empty(self, opacity, fspath):
+    def get_empty(self, opacity=OPAQUE):
         tile = pygame.Surface((SIZE,SIZE), pygame.SRCALPHA, 32)
         tile.fill(self.color_map[255])
         tile.convert_alpha()
@@ -39,58 +38,45 @@ class ColorScheme(base.ColorScheme):
                        ) * 255)
 
         pygame.surfarray.pixels_alpha(tile)[:,:] = opacity 
-        pygame.image.save(tile, fspath)
-
+        
+        # Save and return image
+        tmpfile = NamedTemporaryFile(suffix=".png",delete=False)
+        tmpfile.close()
+        pygame.image.save(tile, tmpfile.name)
+        
+        return open(tmpfile.name, "rb")
 
 class Dot(base.Dot):
-    def hook_get(self, fspath):
-        img = pygame.image.load(fspath)
-        half_size = img.get_size()[0] / 2
-        return img, half_size
-
+    def __init__(self, zoom):
+        super(Dot, self).__init__(zoom)
+        self.img = pygame.image.load(self.definition_png)
+        half_size = self.img.get_size()[0] / 2
 
 class Tile(base.Tile):
-
-    def hook_rebuild(self, points):
-        """Given a list of points, save a tile.
-    
-        This uses the Pygame backend.
-   
-        Good surfarray tutorial (old but still applies):
-
-            http://www.pygame.org/docs/tut/surfarray/SurfarrayIntro.html
-
-        Split out to give us better profiling granularity.
-
-        """
-        tile = self._start()
-        tile = self._add_points(tile, points)
-        tile = self._trim(tile)
-        tile = self._colorize(tile)
-        return tile
+    def __init__(self, queryset, color_scheme, dots, zoom, x, y, point_field='geometry', last_modified_field=None, density_field=None):
+        super(Tile, self).__init__(queryset, color_scheme, dots, zoom, x, y, point_field, last_modified_field, density_field)
+        
+        _color_schemes_dir = os.path.join(gheat_settings.GHEAT_CONF_DIR, 'color-schemes')
+        self.schemeobj = ColorScheme(
+            self.color_scheme,
+            os.path.join(_color_schemes_dir, "%s.png" % self.color_scheme)
+        )
 
 
-    def _start(self):
+    def generate(self):
+        points = self.points()
+        
+        # set up a canvas
         tile = pygame.Surface(self.expanded_size, 0, 32)
         tile.fill(WHITE)
-        return tile
-        #@ why do we get green after this step?
- 
-       
-    def _add_points(self, tile, points):
-        for dest in points:
-            tile.blit(self.dot, dest, None, pygame.BLEND_MULT)
-        return tile
-
-
-    def _trim(self, tile):
+        
+        # Add B&W density points
+        for point in points:
+            tile.blit(self.dot, point, None, pygame.BLEND_MULT)
+        
+        # Crop down to proper size
         tile = tile.subsurface(self.pad, self.pad, SIZE, SIZE).copy()
-        #@ pygame.transform.chop says this or blit; this is plenty fast 
-        return tile
-
-
-    def _colorize(self, tile):
-
+        
         # Invert/colorize
         # ===============
         # The way this works is that we loop through all pixels in the image,
@@ -133,11 +119,10 @@ class Tile(base.Tile):
                 alp[x,y] = _computed_opacities[(conf, pixel)]
 
         tile.unlock()
-   
-        return tile
 
-
-    def save(self):
-        pygame.image.save(self.img, self.fspath)
-
-
+        # Save image
+        tmpfile = NamedTemporaryFile(suffix=".png",delete=False)
+        tmpfile.close()
+        pygame.image.save(tile, tmpfile.name)
+        
+        return open(tmpfile.name, "rb")

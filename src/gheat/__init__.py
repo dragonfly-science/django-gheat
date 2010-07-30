@@ -63,13 +63,13 @@ if _want not in ('pil', 'pygame', ''):
 
 if _want:
     if _want == 'pygame':
-        from gheat.render_backend import pygame as renderer
+        from gheat.render_backend import pygame_ as renderer
     elif _want == 'pil':
         from gheat.render_backend import pil as renderer
     RENDER_BACKEND = _want
 else:
     try:
-        from gheat.render_backend import pygame as renderer
+        from gheat.render_backend import pygame_ as renderer
         RENDER_BACKEND = 'pygame'
     except ImportError:
         try:
