@@ -14,19 +14,25 @@ class Command(NoArgsCommand):
     output_transaction = True
 
     def handle_noargs(self, **options):
+        # We need HTTP basic auth, so build a urlopener for this
         password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
         top_level_url = "http://stream.twitter.com/"
         password_mgr.add_password(None, top_level_url, getattr(settings,'TWITTER_USERNAME',''), getattr(settings,'TWITTER_PASSWORD',''))
         handler = urllib2.HTTPBasicAuthHandler(password_mgr)
         opener = urllib2.build_opener(handler)
+        
+        # Open stream
         f = opener.open("http://stream.twitter.com/1/statuses/sample.json")
         
+        # Buffered read through the stream (possible since file objects are iterable by line)
         for line in f:
             data = json.loads("[%s]"%line)
             tweet = data[0]
             
             # http://dev.twitter.com/doc/get/statuses/public_timeline
             # for example tweet payload
+            
+            # Only looking for tweets with geolocation data
             if tweet.has_key('id') and tweet.has_key('geo') and tweet['geo']:
                 strval = "https://twitter.com/%s/status/%s" % (
                     tweet['user']['screen_name'],
@@ -35,6 +41,8 @@ class Command(NoArgsCommand):
                 latitude = tweet['geo']['coordinates'][0]
                 longitude = tweet['geo']['coordinates'][1]
                 coordstr = "POINT(%s %s)" % (longitude, latitude)
+                
+                # Save data
                 p = TweetPoint(
                     name=u"%s" % strval,
                     geometry=geo_from_str(coordstr)

@@ -40,8 +40,19 @@
 </head>
 <body onload="initialize()">
     <div id="contain">
-        <div><h1>"Tweetmap," a heatmap of tweet locations</h1></div>
+        <div>
+            <h1>"Tweetmap," a heatmap of tweet locations</h1>
+            <p>A demo of <a href="http://github.com/mtigas/django-gheat">mtigas/django-gheat</a>, with data from the <a href="http://dev.twitter.com/pages/streaming_api">Twitter Streaming API</a>.</p>
+        </div>
         <div id="map">&nbsp;</div>
+        <div>
+            <p>Source highlights:</p>
+            <ul>
+                <li><a href="http://github.com/mtigas/django-gheat/tree/master/src/gheat/">src/gheat</a> - django-gheat "core"</li>
+                <li><a href="http://github.com/mtigas/django-gheat/tree/master/src/gheat_demo/">src/gheat_demo</a> - the demo app you are seeing right now</li>
+                <li>an <a href="http://github.com/mtigas/django-gheat/blob/master/src/gheat_demo/tweetmap/management/commands/twitterdump.py">example</a> of opening and using a long-lived connection to the Twitter Streaming API</a></li>
+            </ul>
+        </div>
     </div>
 </body>
 </html>

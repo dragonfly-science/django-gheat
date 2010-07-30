@@ -87,7 +87,7 @@ GHEAT_ALWAYS_BUILD = False
 
 GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 
-CACHE_BACKEND = 'memcached://127.0.0.1:55838/'
+CACHE_BACKEND = 'memcached://127.0.0.1:55838/?timeout=30'
 
 # For 'twitterdump' management command
 TWITTER_USERNAME = u''
