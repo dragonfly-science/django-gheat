@@ -10,7 +10,7 @@ urlpatterns = patterns('gheat_demo.tweetmap.views',
         view    = direct_to_template, 
         name    = 'home',
         kwargs  = {
-            'template': 'home.html',
+            'template': getattr(settings,"TWEETMAP_DEFAULT_TEMPLATE","home.html"),
             'extra_context': {
                 'tweet_count':TweetPoint.objects.count()
             }

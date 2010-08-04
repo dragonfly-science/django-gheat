@@ -48,6 +48,7 @@
             height: 400px;
         }
     </style>
+    {% block head_extra %}{% endblock %}
 </head>
 <body onload="initialize()">
     <div id="contain">
@@ -65,7 +66,8 @@
                 <li>an <a href="http://github.com/mtigas/django-gheat/blob/master/src/gheat_demo/tweetmap/management/commands/twitterdump.py">example</a> of opening and using a long-lived connection to the Twitter Streaming API</a></li>
             </ul>
         </div>
+        {% block content_extra %}{% endblock %}
     </div>
+    {% block body_extra %}{% endblock %}
 </body>
 </html>
-
