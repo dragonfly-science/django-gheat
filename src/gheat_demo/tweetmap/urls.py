@@ -21,7 +21,7 @@ urlpatterns = patterns('gheat_demo.tweetmap.views',
         view    = direct_to_template, 
         name    = 'home_mobile',
         kwargs  = {
-            'template': getattr(settings,"TWEETMAP_DEFAULT_TEMPLATE","home-mobile.html"),
+            'template': "home-mobile.html",
             'extra_context': {
                 'tweet_count':TweetPoint.objects.count()
             }
