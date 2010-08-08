@@ -16,6 +16,17 @@ urlpatterns = patterns('gheat_demo.tweetmap.views',
             }
         }
     ),
+    url(
+        regex   = r'^m/$',
+        view    = direct_to_template, 
+        name    = 'home_mobile',
+        kwargs  = {
+            'template': getattr(settings,"TWEETMAP_DEFAULT_TEMPLATE","home-mobile.html"),
+            'extra_context': {
+                'tweet_count':TweetPoint.objects.count()
+            }
+        }
+    ),
     # URL pattern that serves tiles at the path that Google Maps API expects
     # ex.: /tweetmap/tiles/fire/12/3,2.png
     url(
