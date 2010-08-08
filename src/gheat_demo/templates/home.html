@@ -5,6 +5,74 @@
     <title>"Tweetmap," a heatmap of tweet locations</title>
     <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
     <script type="text/javascript">
+        var mapStyleData = [
+          {
+            featureType: "poi",
+            elementType: "geometry",
+            stylers: [
+              { visibility: "off" }
+            ]
+          },{
+            featureType: "road",
+            elementType: "all",
+            stylers: [
+              { lightness: 29 },
+              { saturation: -97 },
+              { visibility: "simplified" }
+            ]
+          },{
+            featureType: "water",
+            elementType: "all",
+            stylers: [
+              { saturation: -60 },
+              { lightness: 20 }
+            ]
+          },{
+            featureType: "administrative",
+            elementType: "geometry",
+            stylers: [
+              { visibility: "simplified" }
+            ]
+          },{
+            featureType: "all",
+            elementType: "labels",
+            stylers: [
+              { lightness: 26 },
+              { saturation: -100 }
+            ]
+          },{
+            featureType: "water",
+            elementType: "all",
+            stylers: [
+              { visibility: "simplified" }
+            ]
+          },{
+            featureType: "administrative.locality",
+            elementType: "all",
+            stylers: [
+              { visibility: "off" }
+            ]
+          },{
+            featureType: "administrative.neighborhood",
+            elementType: "labels",
+            stylers: [
+              { visibility: "off" }
+            ]
+          },{
+            featureType: "administrative.land_parcel",
+            elementType: "all",
+            stylers: [
+              { visibility: "off" }
+            ]
+          },{
+            featureType: "poi",
+            elementType: "labels",
+            stylers: [
+              { visibility: "off" }
+            ]
+          }
+        ];
+        
         var heatmap = new google.maps.ImageMapType({
             getTileUrl: function(coord, zoom) {
                 var tileRange = 1 << zoom;
@@ -26,10 +94,22 @@
 
         var map;
         function initialize() {
-            map = new google.maps.Map(document.getElementById("map"));
-            map.setCenter(new google.maps.LatLng(38.9517053, -92.3340724));
-            map.setZoom(4);
-            map.setMapTypeId('terrain');
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 4,
+                center:new google.maps.LatLng(38.9517053, -92.3340724),
+                navigationControl: false,
+                mapTypeControlOptions: {
+                    style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                    mapTypeIds: ['simplified', google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.TERRAIN ]
+                }
+            });
+            
+            var customMapType = new google.maps.StyledMapType(mapStyleData, {
+                name: "Simplified"
+            });
+            
+            map.mapTypes.set('simplified', customMapType);
+            map.setMapTypeId('simplified');
             map.overlayMapTypes.insertAt(0, heatmap);
         }
     </script>
