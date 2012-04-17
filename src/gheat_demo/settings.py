@@ -14,8 +14,8 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'gheat-persisted',
-        'USER': 'mtigas',
+        'NAME': 'gheat',
+        'USER': 'gheat',
         'HOST': '127.0.0.1'
     }
 }
