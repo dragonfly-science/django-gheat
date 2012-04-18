@@ -1,7 +1,7 @@
 import os
 PROJECT_HOME = os.path.dirname(__file__)
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -55,7 +55,7 @@ MEDIA_URL = ''
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+STATIC_URL = '/media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '2!8+e=g^cm@6kc2xq3(d#5sp#$jgmpit5ma!_^89ho1*h5po@6'
@@ -87,7 +87,15 @@ GHEAT_ALWAYS_BUILD = False
 
 GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 
-CACHE_BACKEND = 'memcached://127.0.0.1:55838/?timeout=30'
+GHEAT_POINT_MODEL = 'tweetmap.models.TweetPoint'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+        }
+}
+
 
 # For 'twitterdump' management command
 TWITTER_USERNAME = u''

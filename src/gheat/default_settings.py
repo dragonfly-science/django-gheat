@@ -20,12 +20,16 @@ GHEAT_FILESYSTEM_STORAGE_DIR = getattr(settings, 'GHEAT_FILESYSTEM_STORAGE_DIR',
 # ===== Image rendering backends =====
 GHEAT_RENDER_BACKEND = getattr(settings, 'GHEAT_RENDER_BACKEND','PIL')
 
+# ===== Default model to use to hold the points
+GHEAT_POINT_MODEL = getattr(settings, 'GHEAT_POINT_MODEL', 'gheat.models.Point')
+
 # ===== General settings =====
-GHEAT_ZOOM_OPAQUE=getattr(settings, 'GHEAT_ZOOM_OPAQUE', -1)
-GHEAT_ZOOM_TRANSPARENT=getattr(settings, 'GHEAT_ZOOM_TRANSPARENT', 17)
-GHEAT_FULL_OPAQUE=getattr(settings, 'GHEAT_FULL_OPAQUE', True)
-GHEAT_BUILD_EMPTIES=getattr(settings, 'GHEAT_BUILD_EMPTIES', True)
-GHEAT_ALWAYS_BUILD=getattr(settings, 'GHEAT_ALWAYS_BUILD', True)
+GHEAT_ZOOM_OPAQUE = getattr(settings, 'GHEAT_ZOOM_OPAQUE', -1)
+GHEAT_ZOOM_TRANSPARENT = getattr(settings, 'GHEAT_ZOOM_TRANSPARENT', 17)
+GHEAT_FULL_OPAQUE = getattr(settings, 'GHEAT_FULL_OPAQUE', True)
+GHEAT_BUILD_EMPTIES = getattr(settings, 'GHEAT_BUILD_EMPTIES', True)
+GHEAT_ALWAYS_BUILD = getattr(settings, 'GHEAT_ALWAYS_BUILD', True)
+
 
 # ===== Internals =====
 GHEAT_CONF_DIR = getattr(settings, 'GHEAT_CONF_DIR', join(dirname(abspath(__file__)), 'etc'))

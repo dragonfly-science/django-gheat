@@ -1,6 +1,9 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 from gheat import dots, renderer, StorageBackend, color_schemes
-from gheat_demo.tweetmap.models import TweetPoint
+from gheat.defaut_settings import GHEAT_POINT_MODEL
+
+Point = __import__(GHEAT_POINT_MODEL)
+
 
 def serve_tile(request,color_scheme,zoom,x,y):
     # Check arguments
@@ -17,7 +20,7 @@ def serve_tile(request,color_scheme,zoom,x,y):
         return HttpResponseBadRequest()
     
     # Get image and storage backends
-    tile = renderer.Tile(TweetPoint.objects.all(), color_scheme, dots, zoom, x, y)
+    tile = renderer.Tile(Point.objects.all(), color_scheme, dots, zoom, x, y)
     storage_backend = StorageBackend()
     
     # Grab the raw image data
