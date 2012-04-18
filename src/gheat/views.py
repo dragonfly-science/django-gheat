@@ -1,8 +1,11 @@
 from django.http import HttpResponse, HttpResponseBadRequest
 from gheat import dots, renderer, StorageBackend, color_schemes
-from gheat.defaut_settings import GHEAT_POINT_MODEL
+from gheat.default_settings import GHEAT_POINT_MODEL
 
-Point = __import__(GHEAT_POINT_MODEL)
+# A bit of foo to dynamically import the Point class
+module = '.'.join(GHEAT_POINT_MODEL.split('.')[:-1])
+pointclass = GHEAT_POINT_MODEL.split('.')[-1]
+Point = getattr(__import__(module, fromlist=[pointclass]), pointclass)
 
 
 def serve_tile(request,color_scheme,zoom,x,y):

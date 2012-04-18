@@ -4,5 +4,5 @@ from django.conf import settings
 
 
 urlpatterns = patterns('home.views',
-    (r'^$', TemplateView.as_view(template_name= 'home.html'),
+    (r'^$', TemplateView.as_view(template_name= 'home.html')),
 )

@@ -79,6 +79,7 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     'home',
+    'gheat',
 )
 
 # ===== gheat specific settings =====
