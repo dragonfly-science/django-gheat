@@ -26,7 +26,7 @@
     var ne = new google.maps.LatLng({{ extent.2 }},{{ extent.3 }});
     var bounds = new google.maps.LatLngBounds(sw, ne)
     var myOptions = {
-        mapTypeId: google.maps.MapTypeId.ROADMAP
+        mapTypeId: google.maps.MapTypeId.SATELLITE
     };
     var map = new google.maps.Map(document.getElementById("map_canvas"),
             myOptions);
