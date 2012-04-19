@@ -20,7 +20,9 @@ class PointReader(object):
     def readline(self):
         try:
             row = self.reader.next()
-            text = "%(long)s\t%(lat)s\n" % row
+            lat = float(row['lat'])
+            lng = float(row['long'])
+            text = "%0.5f\t%0.5f\n" % (lng, lat)
             self.count += 1
             print self.count, text[:-1]
             return text

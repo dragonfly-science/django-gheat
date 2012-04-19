@@ -1,4 +1,6 @@
 import os
+STORAGE_FILESYSTEM = 1
+
 PROJECT_HOME = os.path.dirname(__file__)
 
 DEBUG = True
@@ -88,10 +90,12 @@ GHEAT_ALWAYS_BUILD = False
 
 GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-        }
-}
+#CACHES = {
+#    'default': {
+#        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#        'LOCATION': '127.0.0.1:11211',
+#        }
+#}
+
+GHEAT_STORAGE_BACKEND = STORAGE_FILESYSTEM
 
