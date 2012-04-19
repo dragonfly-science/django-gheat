@@ -44,7 +44,7 @@ USE_I18N = False
 USE_L10N = False
 
 # Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
+# Example: "/gmap/media/media.lawrence.com/"
 MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -78,7 +78,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'home',
+    'gmap',
     'gheat',
 )
 
@@ -95,7 +95,3 @@ CACHES = {
         }
 }
 
-
-# For 'twitterdump' management command
-TWITTER_USERNAME = u''
-TWITTER_PASSWORD = u''
