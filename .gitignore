@@ -13,3 +13,4 @@ dist
 ._*
 *.egg-info
 pip-log.txt
+.~lock*

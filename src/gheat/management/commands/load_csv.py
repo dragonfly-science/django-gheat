@@ -15,23 +15,35 @@ class PointReader(object):
     def __init__(self, filename):
         self.fid = open(filename)
         self.reader = csv.DictReader(self.fid)
+        self.count = 0
 
     def readline(self):
-        row = self.reader.next()
-        geometry = "ST_GeomFromText('POINT(%(long)s %(lat)s)')" % row
-        return geometry
+        try:
+            row = self.reader.next()
+            text = "%(long)s\t%(lat)s\n" % row
+            self.count += 1
+            print self.count, text[:-1]
+            return text
+        except StopIteration:
+            return ''
 
     def read(self, n=-1):
-        text = self.readline()
-        while n <= 0 or len(text) < n:
-            text += '\n'
-            try:
-                text += self.readline()
-            except:
-                break
-        if n > 0 and len(text) < n:
+        text = ''
+        new = True
+        while new and n > 0 and len(text) < n:
+            new = self.readline()
+            text += new
+        if n >= 0 and len(text) > n:
             text = text[:n]
         return text
+
+    def next():
+        while True:
+            new = self.readline()
+            if new:
+                return new
+            else:
+                raise StopIteration
 
 class Command(BaseCommand):
     args = '<filename>'
@@ -39,6 +51,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         cursor = connection.cursor()
-        cursor.copy_from(PointReader(args[0]), Point._meta.db_table, columns=('geometry',))
+        cursor.execute('CREATE TEMPORARY TABLE _point_import (lat FLOAT, long FLOAT);')
+        cursor.copy_from(PointReader(args[0]), '_point_import')
+        cursor.execute("INSERT INTO %s (geometry) SELECT ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geometry FROM _point_import;" % Point._meta.db_table)
 
 
