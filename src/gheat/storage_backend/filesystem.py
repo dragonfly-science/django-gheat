@@ -28,7 +28,7 @@ class FileSystemStorage(BaseStorage):
         Returns the path that should correspond to this tile file on the filesystem.
         """
         tiledir = self.dir_for_tile(tile, mapname)
-        return os.path.join(tiledir, "%s-%s,%s.png" % (tile.zoom, tile.x, tile.y))
+        return os.path.join(tiledir, "%s/%s,%s.png" % (tile.zoom, tile.x, tile.y))
     
     def has_tile(self, tile, mapname=""):
         filepath = self.path_for_tile(tile, mapname)
