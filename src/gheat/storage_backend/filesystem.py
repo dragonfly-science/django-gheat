@@ -4,6 +4,18 @@ from django.core.exceptions import ImproperlyConfigured
 
 from gheat.storage_backend.base import BaseStorage
 
+
+import os, errno
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST:
+            pass
+        else: 
+            raise
+
 class FileSystemStorage(BaseStorage):
     """
     Storage backend that uses a directory to store actual image files. (Classic
@@ -47,6 +59,7 @@ class FileSystemStorage(BaseStorage):
             
             # Open the output file and write our data to it.
             tilepath = self.path_for_tile(tile, mapname)
+            mkdir_p(os.path.split(tilepath)[0])
             outfile = open(tilepath, 'wb')
             for line in fileobj:
                 outfile.write(line)
@@ -68,8 +81,7 @@ class FileSystemStorage(BaseStorage):
         # If the empty tile for this scheme is not cached
         if not os.path.exists(empty_tile_path):
             # Generate the empty_tiles storage directory
-            if not os.path.exists(storage_dir):
-                os.makedirs(storage_dir)
+            mkdir_p(storage_dir)
             
             # Generate our empty tile
             fileobj = tile.get_empty()

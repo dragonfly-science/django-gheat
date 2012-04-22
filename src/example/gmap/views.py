@@ -3,6 +3,7 @@ from gheat.models import Point
 
 def gmap(request):
     extent = Point.objects.all().extent()
+    print extent
     return render_to_response('gmap.html', {'extent': extent})
 
     

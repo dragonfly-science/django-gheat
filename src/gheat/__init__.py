@@ -16,8 +16,6 @@ from gheat.default_settings import \
 
 
 
-
-
 # Logging config
 # ==============
 

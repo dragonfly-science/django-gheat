@@ -60,7 +60,7 @@ class Dot(object):
     """
 
     def __init__(self, zoom):
-        name = 'dot%d.png' % zoom
+        name = 'dot%d.png' % int(zoom/2)
         self.definition_png = os.path.join(gheat_settings.GHEAT_CONF_DIR, 'dots', name)
 
 class Tile(object):

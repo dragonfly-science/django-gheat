@@ -9,6 +9,7 @@ Point = getattr(__import__(module, fromlist=[pointclass]), pointclass)
 
 
 def serve_tile(request,color_scheme,zoom,x,y):
+    print 'serve tile:', zoom, x, y
     # Check arguments
     try:
         assert color_scheme in color_schemes, ( "bad color_scheme: "

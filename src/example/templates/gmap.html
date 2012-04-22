@@ -22,8 +22,8 @@
 
 
     function initialize() {
-    var sw = new google.maps.LatLng({{ extent.0 }},{{ extent.1 }});
-    var ne = new google.maps.LatLng({{ extent.2 }},{{ extent.3 }});
+    var sw = new google.maps.LatLng({{ extent.1 }},{{ extent.0 }});
+    var ne = new google.maps.LatLng({{ extent.3 }},{{ extent.2 }});
     var bounds = new google.maps.LatLngBounds(sw, ne)
     var myOptions = {
         mapTypeId: google.maps.MapTypeId.SATELLITE
