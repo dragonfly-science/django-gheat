@@ -1,4 +1,11 @@
 import os
+
+# Googlemaps api key
+try:
+    from secrets import GOOGLEMAPS_API_KEY
+except ImportError:
+    GOOGLEMAPS_API_KEY = ''
+
 STORAGE_FILESYSTEM = 1
 
 PROJECT_HOME = os.path.dirname(__file__)
@@ -98,4 +105,7 @@ GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 #}
 
 GHEAT_STORAGE_BACKEND = STORAGE_FILESYSTEM
+GHEAT_RENDER_BACKEND = 'Numeric'
+GHEAT_MAX_VALUE = 10
+GHEAT_SCALING_COEFFICIENT = 0.5
 

@@ -12,7 +12,7 @@ from gheat.default_settings import \
     STORAGES, \
     STORAGE_DUMMY, STORAGE_FILESYSTEM, STORAGE_DJANGO_CACHE, \
     RENDERERS, \
-    RENDERER_PIL, RENDERER_PYGAME
+    RENDERER_PIL, RENDERER_PYGAME, RENDERER_NUMERIC
 
 
 
@@ -52,9 +52,10 @@ else:
 RENDER_BACKEND = None 
 RENDER_BACKEND_PIL = False 
 RENDER_BACKEND_PYGAME = False
+RENDER_BACKEND_NUMERIC = False
 
 _want = gheat_settings.GHEAT_RENDER_BACKEND.lower()
-if _want not in ('pil', 'pygame', ''):
+if _want not in ('pil', 'pygame', 'numeric', ''):
     raise ImproperlyConfigured( "The %s render backend is not supported, only PIL and "
                             + "Pygame (assuming those libraries are installed)."
                              )
@@ -64,23 +65,30 @@ if _want:
         from gheat.render_backend import pygame_ as renderer
     elif _want == 'pil':
         from gheat.render_backend import pil as renderer
+    elif _want == 'numeric':
+        from gheat.render_backend import numeric as renderer
     RENDER_BACKEND = _want
 else:
     try:
-        from gheat.render_backend import pygame_ as renderer
-        RENDER_BACKEND = 'pygame'
+        from gheat.render_backend import numeric as renderer
+        RENDER_BACKEND = 'numeric'
     except ImportError:
         try:
             from gheat.render_backend import pil as renderer
             RENDER_BACKEND = 'pil'
         except ImportError:
-            pass
+            try:
+                from gheat.render_backend import pygame_ as renderer
+                RENDER_BACKEND = 'pygame'
+            except ImportError:
+                pass
     
 if RENDER_BACKEND is None:
-    raise ImportError("Neither Pygame nor PIL could be imported.")
+    raise ImportError("Render backend could be imported.")
 
 RENDER_BACKEND_PYGAME = RENDER_BACKEND == 'pygame'
 RENDER_BACKEND_PIL = RENDER_BACKEND == 'pil'
+RENDER_BACKEND_NUMERIC = RENDER_BACKEND == 'numeric'
 
 log.info("Using the %s library" % RENDER_BACKEND)
 

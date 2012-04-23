@@ -4,12 +4,13 @@
 from django.conf import settings
 from os.path import dirname, abspath, join
 
+
 # ===== Some constants =====
 STORAGES = range(0,0+3)
 STORAGE_DUMMY, STORAGE_FILESYSTEM, STORAGE_DJANGO_CACHE = STORAGES
 
-RENDERERS = range(100,100+2)
-RENDERER_PIL, RENDERER_PYGAME = RENDERERS
+RENDERERS = range(100,100+3)
+RENDERER_PIL, RENDERER_PYGAME, RENDERER_NUMERIC = RENDERERS
 
 # ===== Storage backends =====
 GHEAT_STORAGE_BACKEND = getattr(settings, 'GHEAT_STORAGE_BACKEND', STORAGE_DJANGO_CACHE)
@@ -41,3 +42,15 @@ if not GHEAT_LOG_LEVEL and DEBUG:
     GHEAT_LOG_LEVEL = 'DEBUG'
 else:
     GHEAT_LOG_LEVEL = 'ERROR'
+
+#
+MAP_MODES = range(1000, 1003)
+GHEAT_MAP_MODE_COUNT, GHEAT_MAP_MODE_SUM_DENSITY, GHEAT_MAP_MODE_MEAN_DENSITY = MAP_MODES
+GHEAT_MAP_MODE =  getattr(settings, 'GHEAT_MAP_MODE', GHEAT_MAP_MODE_COUNT)
+
+# Control conversion from numeric values to pixel values
+GHEAT_MAX_VALUE = getattr(settings, 'GHEAT_MAX_VALUE', 100)
+GHEAT_SCALING_COEFFICIENT=  getattr(settings, 'GHEAT_SCALING_COEFFICIENT', 1.0)
+GHEAT_OPACITY_LIMIT=  getattr(settings, 'GHEAT_OPACITY_LIMIT', 1)
+
+
