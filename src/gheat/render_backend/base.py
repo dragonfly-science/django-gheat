@@ -179,7 +179,8 @@ class Tile(object):
             x = x - self.x1 # account for tile offset relative to
             y = y - self.y1 #  overall map
             point_density = feature_dict.get(self.density_field, 1)
-            result.append((x-self.pad, y-self.pad, point_density))
+            #result.append((x-self.pad, y-self.pad, point_density))
+            result.append((x,  y, point_density))
         return result
 
     def generate(self):

@@ -42,18 +42,24 @@ class ColorScheme(base.ColorScheme):
 #        self.half_size = (self.img.size[0] / 2)
 
 def cone(d, x, y):
-    # Value is 1 when x = d and y = d, and decreases to zero away from this point
+    # Value is 1.0 when x = d and y = d, and decreases to zero away from this point
     r = np.sqrt((d - x)**2 + (d - y)**2)
-    return np.max([0,  1 - r/d])
+    if d == 0:
+        if r == 0:
+            return 1.0
+        else:
+            return 0.0
+    else:
+        return np.max([0.0,  1.0 - r/d])
 
 class Dot(object):
     def __init__(self, zoom):
-        self.half_size = zoom
-        self.img = np.zeros((self.half_size*2 + 1, self.half_size*2 + 1))
+        self.half_size = zoom + 2
+        self.img = np.zeros((self.half_size*2 - 1, self.half_size*2 - 1))
         self.size = self.img.shape[0]
         for i in range(self.size):
             for j in range(self.size):
-                self.img[i, j] = cone(self.half_size, i, j)
+                self.img[i, j] = cone(self.half_size - 1, i, j)
 
 class Tile(base.Tile):
     def __init__(self, queryset, color_scheme, dots, zoom, x, y, point_field='geometry', last_modified_field=None, density_field=None):
@@ -70,17 +76,17 @@ class Tile(base.Tile):
         points = self.points()
         
         # Grab a new PIL image canvas
-        count = np.zeros(self.expanded_size)
-        density = np.zeros(self.expanded_size)
+        self.buffer = 2*self.pad
+        count = np.zeros([x + 2*self.buffer for x in self.expanded_size])
+        density = np.zeros([x + 2*self.buffer for x in self.expanded_size])
         
         # Render the B&W density version of the heatmap
         size = self.dot.shape[0]
-        half_size = (size - 1)/2
-
         for y, x, weight in points:
-            count[x:(x + size), y:(y + size)] += self.dot
-            density[x:(x + size), y:(y + size)] += self.dot*weight
-
+            count[(x + self.buffer):(x + self.buffer + size), 
+                (y + self.buffer):(y + self.buffer + size)] += self.dot
+            density[(x + self.buffer):(x + self.buffer + size), 
+                (y + self.buffer):(y + self.buffer + size)] += self.dot*weight
 
         # Pick the field to map
         if gheat_settings.GHEAT_MAP_MODE == gheat_settings.GHEAT_MAP_MODE_COUNT:
@@ -97,11 +103,13 @@ class Tile(base.Tile):
             
         # Crop resulting density image (which could have grown) into the
         # actual canvas size we want
-        img = img[self.pad:(SIZE + self.pad), self.pad:(SIZE + self.pad)]
+        img = img[(self.pad + self.buffer):(SIZE + self.pad + self.buffer), 
+            (self.pad + self.buffer):(SIZE + self.pad + self.buffer)]
         #opacity = opacity[self.pad:(SIZE + self.pad), self.pad:(SIZE + self.pad)]
 
         # Convert to a 0 to 255 image
-        img = np.clip(256.0*np.power(img/gheat_settings.GHEAT_MAX_VALUE, gheat_settings.GHEAT_SCALING_COEFFICIENT), 0, 255.999).astype('uint8')
+        img = np.clip(256.0*np.power(img/gheat_settings.GHEAT_MAX_VALUE, 
+            gheat_settings.GHEAT_SCALING_COEFFICIENT), 0, 255.999).astype('uint8')
         
         # Given the B&W density image, generate a color heatmap based on
         # this Tile's color scheme.
