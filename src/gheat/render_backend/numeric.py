@@ -13,9 +13,12 @@ from gheat.render_backend import base
 class ColorScheme(base.ColorScheme):
     def __init__(self, schemename, definition_png):
         super(ColorScheme,self).__init__(schemename, definition_png)
-        
-        self.colors = Image.open(definition_png).load()
 
+        reader = png.Reader(definition_png)
+        self.colors = np.array([(r[0], r[1], r[2], r[3]) for r in p.asRGBA()[2]])
+        if self.colors.shape != (256, 4):
+            raise ValueError, 'Colour scheme must have 256 colours'
+        
     def get_empty(self, opacity=OPAQUE):
         color = self.colors[0, 255]
         if (type(color) is not int) and (len(color) == 4): # color map has per-pixel alpha
@@ -54,7 +57,7 @@ def cone(d, x, y):
 
 class Dot(object):
     def __init__(self, zoom):
-        self.half_size = zoom + 2
+        self.half_size = int(zoom/2 + 2)
         self.img = np.zeros((self.half_size*2 + 1, self.half_size*2 + 1))
         self.size = self.img.shape[0]
         for i in range(self.size):
