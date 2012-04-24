@@ -55,11 +55,11 @@ def cone(d, x, y):
 class Dot(object):
     def __init__(self, zoom):
         self.half_size = zoom + 2
-        self.img = np.zeros((self.half_size*2 - 1, self.half_size*2 - 1))
+        self.img = np.zeros((self.half_size*2 + 1, self.half_size*2 + 1))
         self.size = self.img.shape[0]
         for i in range(self.size):
             for j in range(self.size):
-                self.img[i, j] = cone(self.half_size - 1, i, j)
+                self.img[i, j] = cone(self.half_size, i, j)
 
 class Tile(base.Tile):
     def __init__(self, queryset, color_scheme, dots, zoom, x, y, point_field='geometry', last_modified_field=None, density_field=None):
@@ -72,7 +72,6 @@ class Tile(base.Tile):
         )
 
     def generate(self):
-        print 'Generate tile', len(self.points())
         points = self.points()
         
         # Grab a new PIL image canvas
@@ -81,12 +80,14 @@ class Tile(base.Tile):
         density = np.zeros([x + 2*self.buffer for x in self.expanded_size])
         
         # Render the B&W density version of the heatmap
-        size = self.dot.shape[0]
-        for y, x, weight in points:
-            count[(x + self.buffer):(x + self.buffer + size), 
-                (y + self.buffer):(y + self.buffer + size)] += self.dot
-            density[(x + self.buffer):(x + self.buffer + size), 
-                (y + self.buffer):(y + self.buffer + size)] += self.dot*weight
+        dot_size = self.dot.shape[0]
+        for x, y, weight in points:
+            x1 = x + self.buffer - (dot_size - 1)/2
+            y1 = y + self.buffer - (dot_size - 1)/2
+            count[y1:(y1 + dot_size), 
+                x1:(x1 + dot_size)] += self.dot
+            density[y1:(y1 + dot_size), 
+                x1:(x1+ dot_size)] += self.dot*weight
 
         # Pick the field to map
         if gheat_settings.GHEAT_MAP_MODE == gheat_settings.GHEAT_MAP_MODE_COUNT:
@@ -111,6 +112,7 @@ class Tile(base.Tile):
         img = np.clip(256.0*np.power(img/gheat_settings.GHEAT_MAX_VALUE, 
             gheat_settings.GHEAT_SCALING_COEFFICIENT), 0, 255.999).astype('uint8')
         
+
         # Given the B&W density image, generate a color heatmap based on
         # this Tile's color scheme.
         _computed_opacities = dict()
