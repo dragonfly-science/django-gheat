@@ -17,10 +17,11 @@ class ColorScheme(object):
     Base class for color scheme representations.
     """
 
-    def __init__(self, schemename, definition_png):
+    def __init__(self, scheme_name, definition_png):
         """
         Takes the name and filesystem path of the defining PNG.
         """
+        self.scheme_name = scheme_name
         self.definition_png = definition_png
 
     def get_empty(self, opacity):

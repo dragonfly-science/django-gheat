@@ -2,7 +2,6 @@ import os
 from tempfile import SpooledTemporaryFile
 
 import numpy as np
-from PIL import Image, ImageChops
 import png
 
 from gheat import SIZE
@@ -11,38 +10,25 @@ from gheat.opacity import OPAQUE
 from gheat.render_backend import base
 
 class ColorScheme(base.ColorScheme):
-    def __init__(self, schemename, definition_png):
-        super(ColorScheme,self).__init__(schemename, definition_png)
+    def __init__(self, scheme_name, definition_png):
+        super(ColorScheme,self).__init__(scheme_name, definition_png)
 
-        reader = png.Reader(definition_png)
-        self.colors = np.array([(r[0], r[1], r[2], r[3]) for r in p.asRGBA()[2]])
+        image = png.Reader(open(definition_png))
+        self.colors = np.array([(r[0], r[1], r[2], r[3]) for r in image.asRGBA()[2]])
         if self.colors.shape != (256, 4):
             raise ValueError, 'Colour scheme must have 256 colours'
         
     def get_empty(self, opacity=OPAQUE):
-        color = self.colors[0, 255]
-        if (type(color) is not int) and (len(color) == 4): # color map has per-pixel alpha
-            (conf, pixel) = opacity, color[3] 
-            opacity = int(( (conf/255.0)    # from configuration
-                          * (pixel/255.0)   # from per-pixel alpha
-                           ) * 255)
+        color = self.colors[255,:]
+        color[3] = int(color[3]*float(opacity)/255)
 
-        if (type(color) is not int):
-            color = color[:3] + (opacity,)
-        
-        tile = Image.new('RGBA', (SIZE, SIZE), color)
-        
+        empty = np.tile(color, SIZE*SIZE).reshape(SIZE, SIZE*4)
+
         tmpfile = SpooledTemporaryFile()
-        tile.save(tmpfile, 'PNG')
+        writer = png.Writer(SIZE, SIZE, alpha=True, bitdepth=8)
+        writer.write(tmpfile, empty)
         tmpfile.seek(0)
-        
         return tmpfile
-
-#class Dot(base.Dot):
-#    def __init__(self, zoom):
-#        super(Dot, self).__init__(zoom)
-#        self.img = Image.open(self.definition_png)
-#        self.half_size = (self.img.size[0] / 2)
 
 def cone(d, x, y):
     # Value is 1.0 when x = d and y = d, and decreases to zero away from this point
@@ -77,7 +63,6 @@ class Tile(base.Tile):
     def generate(self):
         points = self.points()
         
-        # Grab a new PIL image canvas
         self.buffer = 2*self.pad
         count = np.zeros([x + 2*self.buffer for x in self.expanded_size])
         density = np.zeros([x + 2*self.buffer for x in self.expanded_size])
@@ -100,7 +85,8 @@ class Tile(base.Tile):
             img = density
             #opacity = np.clip(count, 0, gheat_settings.GHEAT_OPACITY_LIMIT)
         elif  gheat_settings.GHEAT_MAP_MODE == gheat_settings.GHEAT_MAP_MODE_MEAN_DENSITY:
-            img = density/count
+            img = density
+            img[count > 0] /= count[count > 0]
             #opacity = np.clip(count, 0, gheat_settings.GHEAT_OPACITY_LIMIT)
         else:
             raise ValueError, 'Unknown map mode'
@@ -118,39 +104,12 @@ class Tile(base.Tile):
 
         # Given the B&W density image, generate a color heatmap based on
         # this Tile's color scheme.
-        _computed_opacities = dict()
         colour_image = np.zeros((SIZE, SIZE, 4), 'uint8')
-        img = 255 - img
-        for x in range(SIZE):
-            for y in range(SIZE):
-
-                # Get color for this intensity
-                # ============================
-                # is a value
-                val = self.schemeobj.colors[0, int(img[x, y])]
-                try:
-                    pix_alpha = val[3] # the color image has transparency
-                except IndexError:
-                    pix_alpha = OPAQUE # it doesn't
-                
-
-                # Blend the opacities
-                # ===================
-                conf, pixel = self.opacity, pix_alpha
-                if (conf, pixel) not in _computed_opacities:
-                    opacity = int(( (conf/255.0)    # from configuration
-                                  * (pixel/255.0)   # from per-pixel alpha
-                                   ) * 255)
-                    _computed_opacities[(conf, pixel)] = opacity
-
-                
-                colour_image[x, y, :] = val[:3] + (_computed_opacities[(conf, pixel)],)
-
+        for i in range(4):
+            colour_image[:,:,i] = self.schemeobj.colors[:,i][255 - img]
+        
         tmpfile = SpooledTemporaryFile()
         writer = png.Writer(SIZE, SIZE, alpha=True, bitdepth=8)
         writer.write(tmpfile, np.reshape(colour_image, (SIZE, SIZE*4)))
-
-        #writer.write(tmpfile, img)
         tmpfile.seek(0)
-       
         return tmpfile
