@@ -27,6 +27,11 @@ class Command(BaseCommand):
             dest = 'long',
             default = 'long',
             help = 'Name of the longitude column'),
+        make_option('--density',
+            action = 'store',
+            dest = 'density',
+            default = 'density',
+            help = 'Name of the longitude column'),
         )
     
     def handle(self, *args, **options):
@@ -38,8 +43,8 @@ class Command(BaseCommand):
             tempfile.write("%0.5f\t%0.5f\n" % (lng, lat))
         tempfile.seek(0)
         cursor = connection.cursor()
-        cursor.execute('CREATE TEMPORARY TABLE _point_import (long FLOAT, lat FLOAT);')
+        cursor.execute('CREATE TEMPORARY TABLE _point_import (long FLOAT, lat FLOAT, density FLOAT);')
         cursor.copy_from(tempfile, '_point_import')
-        cursor.execute("INSERT INTO %s (geometry) SELECT ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geometry FROM _point_import;" % Point._meta.db_table)
+        cursor.execute("INSERT INTO %s (geometry) SELECT ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geometry, density FROM _point_import;" % Point._meta.db_table)
         transaction.commit_unless_managed()
 
