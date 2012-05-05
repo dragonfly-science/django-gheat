@@ -97,6 +97,10 @@ class Tile(base.Tile):
             (self.pad + self.buffer):(SIZE + self.pad + self.buffer)]
         #opacity = opacity[self.pad:(SIZE + self.pad), self.pad:(SIZE + self.pad)]
 
+
+        # Maybe use a logarithm
+        img = np.where(img>0, np.log(img)+1, img)
+
         # Convert to a 0 to 255 image
         img = np.clip(256.0*np.power(img/gheat_settings.GHEAT_MAX_VALUE, 
             gheat_settings.GHEAT_SCALING_COEFFICIENT), 0, 255.999).astype('uint8')
