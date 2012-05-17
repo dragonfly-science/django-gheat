@@ -13,6 +13,12 @@ module = '.'.join(GHEAT_POINT_MODEL.split('.')[:-1])
 pointclass = GHEAT_POINT_MODEL.split('.')[-1]
 Point = getattr(__import__(module, fromlist=[pointclass]), pointclass)
 
+def float_or_none(x):
+    try:
+        return float(x)
+    except ValueError:
+        return None
+
 class Command(BaseCommand):
     args = '<filename>'
     help = 'Import data from the csv file "filename", which has columns lat and long.'
@@ -31,20 +37,23 @@ class Command(BaseCommand):
             action = 'store',
             dest = 'density',
             default = 'density',
-            help = 'Name of the longitude column'),
+            help = 'Name of the density column'),
         )
     
     def handle(self, *args, **options):
         tempfile = TemporaryFile('w+r')
         reader = csv.DictReader(open(args[0]))
         for row in reader:
-            lng = float(row[options['long']])
-            lat = float(row[options['lat']])
-            tempfile.write("%0.5f\t%0.5f\n" % (lng, lat))
+            lng = float_or_none(row[options['long']])
+            lat = float_or_none(row[options['lat']])
+            density = float_or_none(row[options['density']])
+            if lng is not None and lat is not None and density is not None:
+                tempfile.write("%0.5f\t%0.5f\t%0.5f\n" % (lng, lat, density))
         tempfile.seek(0)
         cursor = connection.cursor()
         cursor.execute('CREATE TEMPORARY TABLE _point_import (long FLOAT, lat FLOAT, density FLOAT);')
         cursor.copy_from(tempfile, '_point_import')
-        cursor.execute("INSERT INTO %s (geometry) SELECT ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geometry, density FROM _point_import;" % Point._meta.db_table)
+        options['table'] = Point._meta.db_table
+        cursor.execute("INSERT INTO %(table)s (geometry, density) SELECT ST_SetSRID(ST_MakePoint(long, lat), 4326) AS geometry, density FROM _point_import;" % options)
         transaction.commit_unless_managed()
 

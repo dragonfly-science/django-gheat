@@ -13,14 +13,14 @@
 <script type="text/javascript">
     heatmap = new google.maps.ImageMapType({
         getTileUrl: function(tile, zoom) {
-            return "http://127.0.0.1:8000/tiles/classictrans/" + zoom + "/" + tile.x + "," + tile.y +".png"; 
+            return "http://127.0.0.1:8000/tiles/classic/" + zoom + "/" + tile.x + "," + tile.y +".png"; 
         },
         tileSize: new google.maps.Size(256, 256),
         opacity:0.6,
         isPng: true
     });
 
-
+/*
  function CoordMapType(tileSize) {
     this.tileSize = tileSize;
   }
@@ -36,21 +36,25 @@
     div.style.borderColor = '#AAAAAA';
     return div;
   };
- 
+*/
+
     function initialize() {
     var sw = new google.maps.LatLng({{ extent.1 }},{{ extent.0 }});
     var ne = new google.maps.LatLng({{ extent.3 }},{{ extent.2 }});
     var bounds = new google.maps.LatLngBounds(sw, ne)
     var myOptions = {
-        mapTypeId: google.maps.MapTypeId.SATELLITE
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
+        scaleControl: true,
+        panControl: false,
+        streetViewControl: false
     };
     var map = new google.maps.Map(document.getElementById("map_canvas"),
             myOptions);
     map.overlayMapTypes.push(null); // create empty overlay entry   
     map.overlayMapTypes.setAt("0", heatmap); // set the overlay, 0 index
  
- map.overlayMapTypes.insertAt(
-        1, new CoordMapType(new google.maps.Size(256, 256)));
+ /*map.overlayMapTypes.insertAt(
+        1, new CoordMapType(new google.maps.Size(256, 256))); */
    map.fitBounds(bounds);
     }
     </script>

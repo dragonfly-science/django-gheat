@@ -6,7 +6,6 @@ try:
 except ImportError:
     GOOGLEMAPS_API_KEY = ''
 
-STORAGE_FILESYSTEM = 1
 
 PROJECT_HOME = os.path.dirname(__file__)
 
@@ -93,8 +92,11 @@ INSTALLED_APPS = (
 
 # ===== gheat specific settings =====
 # see gheat.default_settings for a full list of settings you can override
-GHEAT_ALWAYS_BUILD = False
 
+GHEAT_MAP_MODE_SUM_DENSITY = 1001
+STORAGE_FILESYSTEM = 1
+
+GHEAT_ALWAYS_BUILD = False
 GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 
 #CACHES = {
@@ -106,6 +108,8 @@ GHEAT_FILESYSTEM_STORAGE_DIR = '/tmp/gheat/'
 
 GHEAT_STORAGE_BACKEND = STORAGE_FILESYSTEM
 GHEAT_RENDER_BACKEND = 'Numeric'
-GHEAT_MAX_VALUE = 5
+GHEAT_MAX_VALUE = 7
 GHEAT_SCALING_COEFFICIENT =  1
+GHEAT_MAP_MODE = GHEAT_MAP_MODE_SUM_DENSITY
+GHEAT_MIN_DENSITY = 0.1
 

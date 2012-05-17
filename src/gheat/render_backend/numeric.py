@@ -20,7 +20,8 @@ class ColorScheme(base.ColorScheme):
         
     def get_empty(self, opacity=OPAQUE):
         color = self.colors[255,:]
-        color[3] = int(color[3]*float(opacity)/255)
+        #color[3] = int(color[3]*float(opacity)/255)
+        color[3] = 0
 
         empty = np.tile(color, SIZE*SIZE).reshape(SIZE, SIZE*4)
 
@@ -43,7 +44,7 @@ def cone(d, x, y):
 
 class Dot(object):
     def __init__(self, zoom):
-        self.half_size = int(zoom/2 + 2)
+        self.half_size = int(zoom/1.5 + 2)
         self.img = np.zeros((self.half_size*2 + 1, self.half_size*2 + 1))
         self.size = self.img.shape[0]
         for i in range(self.size):
@@ -51,7 +52,7 @@ class Dot(object):
                 self.img[i, j] = cone(self.half_size, i, j)
 
 class Tile(base.Tile):
-    def __init__(self, queryset, color_scheme, dots, zoom, x, y, point_field='geometry', last_modified_field=None, density_field=None):
+    def __init__(self, queryset, color_scheme, dots, zoom, x, y, point_field='geometry', last_modified_field=None, density_field='density'):
         super(Tile, self).__init__(queryset, color_scheme, dots, zoom, x, y, point_field, last_modified_field, density_field)
         
         _color_schemes_dir = os.path.join(gheat_settings.GHEAT_CONF_DIR, 'color-schemes')
@@ -75,7 +76,7 @@ class Tile(base.Tile):
             count[y1:(y1 + dot_size), 
                 x1:(x1 + dot_size)] += self.dot
             density[y1:(y1 + dot_size), 
-                x1:(x1+ dot_size)] += self.dot*weight
+                x1:(x1+ dot_size)] += self.dot*float(weight)
 
         # Pick the field to map
         if gheat_settings.GHEAT_MAP_MODE == gheat_settings.GHEAT_MAP_MODE_COUNT:
@@ -108,10 +109,11 @@ class Tile(base.Tile):
 
         # Given the B&W density image, generate a color heatmap based on
         # this Tile's color scheme.
-        colour_image = np.zeros((SIZE, SIZE, 4), 'uint8')
-        for i in range(4):
+        colour_image = np.zeros((SIZE, SIZE, 4), 'uint8') + 255
+        for i in range(3):
             colour_image[:,:,i] = self.schemeobj.colors[:,i][255 - img]
-        
+        colour_image[:,:,3] = np.where(img > gheat_settings.GHEAT_MIN_DENSITY, 255, 0)
+
         tmpfile = SpooledTemporaryFile()
         writer = png.Writer(SIZE, SIZE, alpha=True, bitdepth=8)
         writer.write(tmpfile, np.reshape(colour_image, (SIZE, SIZE*4)))
